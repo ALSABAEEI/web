@@ -6,7 +6,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
   exit();
 }
 
-// Inline database connection 1231321321
+// Inline database connection 123132132122
 $servername = "localhost";
 $username = "root";
 $password = "";
