@@ -6,7 +6,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit();
 }
 
-// Logout Logic
+// Logout Logicjhjh
 if (isset($_GET['logout'])) {
     session_destroy();
     header('Location: login.php');
