@@ -83,6 +83,8 @@ $conn->close();
                     <li><a href="Dashboard.php" class="active">Dashboard</a></li>
                     <li><a href="membership-card.php">Membership Card</a></li>
                     <li><a href="update-student-info.php">Manage Profile</a></li>
+                    <li><a href="orders.php">Orders</a></li>
+
                 </ul>
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
             </nav>
@@ -200,12 +202,27 @@ $conn->close();
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { display: true },
-                    tooltip: { enabled: true }
+                    legend: {
+                        display: true
+                    },
+                    tooltip: {
+                        enabled: true
+                    }
                 },
                 scales: {
-                    x: { title: { display: true, text: 'Months' } },
-                    y: { beginAtZero: true, title: { display: true, text: 'Spending (RM)' } }
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Months'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Spending (RM)'
+                        }
+                    }
                 }
             }
         });

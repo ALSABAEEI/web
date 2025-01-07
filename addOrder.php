@@ -114,10 +114,20 @@ $conn->close();
     <!-- Header -->
     <header id="header" class="header d-flex align-items-center">
         <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
-            <a href="#" class="logo d-flex align-items-center">
+            <a href="dashboard.php" class="logo d-flex align-items-center">
                 <h1 class="sitename">RP</h1>
                 <span>.</span>
             </a>
+            <nav id="navmenu" class="navmenu">
+                <ul>
+                    <li><a href="Dashboard.php" class="active">Dashboard</a></li>
+                    <li><a href="membership-card.php">Membership Card</a></li>
+                    <li><a href="update-student-info.php">Manage Profile</a></li>
+                    <li><a href="orders.php">Orders</a></li>
+
+                </ul>
+                <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+            </nav>
             <a href="logout.php" class="btn btn-primary btn-sm">Log Out</a>
         </div>
     </header>
