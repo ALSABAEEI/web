@@ -128,12 +128,13 @@ if (!empty($_GET['search_date'])) {
 </head>
 
 <body class="admin-page">
-  <header class="header d-flex align-items-center justify-content-between">
+<header class="header d-flex align-items-center justify-content-between">
     <div class="container-fluid d-flex align-items-center justify-content-between">
       <a href="dashboard.php" class="logo">RP<span>.</span></a>
       <div class="d-flex align-items-center">
         <span class="text-light me-3">Welcome, <?php echo htmlspecialchars($adminName); ?>!</span>
         <a href="manageBran.php" class="btn btn-sm btn-manage-branch">Manage Branch</a>
+        <a href="manage-students.php" class="btn btn-sm btn-manage-branch">Manage students</a>
         <a href="adminDash.php?logout=true" class="btn btn-sm btn-logout">Log Out</a>
       </div>
     </div>
