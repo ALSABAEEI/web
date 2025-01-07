@@ -2,15 +2,15 @@
 session_start();
 
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: login.php');
-    exit();
+  header('Location: login.php');
+  exit();
 }
-
+// 433333333333
 // Logout Logicjhjhkjkjgk
 if (isset($_GET['logout'])) {
-    session_destroy();
-    header('Location: login.php');
-    exit();
+  session_destroy();
+  header('Location: login.php');
+  exit();
 }
 
 // Get the admin's name from the session
@@ -25,7 +25,7 @@ $dbname = "rapidprint";
 $conn = mysqli_connect($servername, $username, $password, $dbname);
 
 if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
+  die("Connection failed: " . mysqli_connect_error());
 }
 
 // Fetch data for the header section
@@ -50,11 +50,11 @@ $ordersPerBranchResult = mysqli_query($conn, $ordersPerBranchQuery);
 $branches = [];
 $orders = [];
 while ($row = mysqli_fetch_assoc($ordersPerBranchResult)) {
-    $branches[] = $row['BranchName'];
-    $orders[] = $row['totalOrders'];
+  $branches[] = $row['BranchName'];
+  $orders[] = $row['totalOrders'];
 }
 
-// Fetch data for the pie chart (Revenue per Branch)
+// Fetch data for the pie chart (Revenue per Branch)22222
 $revenuePerBranchQuery = "
     SELECT b.BranchName, SUM(o.OrderTotal) AS revenue
     FROM orders o
@@ -64,32 +64,32 @@ $revenuePerBranchResult = mysqli_query($conn, $revenuePerBranchQuery);
 $branchesForRevenue = [];
 $revenues = [];
 while ($row = mysqli_fetch_assoc($revenuePerBranchResult)) {
-    $branchesForRevenue[] = $row['BranchName'];
-    $revenues[] = $row['revenue'];
+  $branchesForRevenue[] = $row['BranchName'];
+  $revenues[] = $row['revenue'];
 }
 
 // Handle Order Status Search
 $orderSearchResults = [];
 if (!empty($_GET['order_status'])) {
-    $orderStatus = trim($_GET['order_status']); // Clean the input
-    $orderStatusQuery = "
+  $orderStatus = trim($_GET['order_status']); // Clean the input
+  $orderStatusQuery = "
     SELECT orders.*, branch.BranchName 
     FROM orders 
     LEFT JOIN branch ON orders.BranchID = branch.BranchID 
     WHERE orders.OrderStatus = '$orderStatus'"; // Directly insert the value into the query
-    $orderSearchResults = mysqli_query($conn, $orderStatusQuery); // Execute the query
+  $orderSearchResults = mysqli_query($conn, $orderStatusQuery); // Execute the query
 }
 
 // Handle Date-based Search
 $dateSearchResults = [];
 if (!empty($_GET['search_date'])) {
-    $searchDate = trim($_GET['search_date']); // Clean the input
-    $dateQuery = "
+  $searchDate = trim($_GET['search_date']); // Clean the input
+  $dateQuery = "
     SELECT orders.*, branch.BranchName 
     FROM orders 
     LEFT JOIN branch ON orders.BranchID = branch.BranchID 
     WHERE orders.Date = '$searchDate'"; // Directly insert the value into the query
-    $dateSearchResults = mysqli_query($conn, $dateQuery); // Execute the query
+  $dateSearchResults = mysqli_query($conn, $dateQuery); // Execute the query
 }
 
 ?>
@@ -115,7 +115,8 @@ if (!empty($_GET['search_date'])) {
       padding: 10px 20px;
     }
 
-    .header .btn-manage-branch, .header .btn-logout {
+    .header .btn-manage-branch,
+    .header .btn-logout {
       margin-left: 10px;
       border: 1px solid #ffc107;
       color: #ffc107;
@@ -169,7 +170,8 @@ if (!empty($_GET['search_date'])) {
         </div>
       </div>
     </div>
-    <br><hr>
+    <br>
+    <hr>
     <!-- Graph Section -->
     <div class="container">
       <h4>Orders per Branch</h4>
@@ -190,7 +192,8 @@ if (!empty($_GET['search_date'])) {
           }
         });
       </script>
-<br><br><hr>
+      <br><br>
+      <hr>
       <h4>Revenue Distribution</h4>
       <canvas id="revenueChart"></canvas>
       <script>
@@ -209,7 +212,8 @@ if (!empty($_GET['search_date'])) {
         });
       </script>
     </div>
-<br><br><hr><br>
+    <br><br>
+    <hr><br>
     <!-- Search Section -->
     <div class="container search-section">
       <h4>Search Orders</h4>
@@ -236,7 +240,7 @@ if (!empty($_GET['search_date'])) {
         </div>
       </div>
     </div>
-<br><br><br>
+    <br><br><br>
     <!-- Search Results -->
     <div class="container">
       <?php if (!empty($orderSearchResults)) : ?>
@@ -252,7 +256,8 @@ if (!empty($_GET['search_date'])) {
             </tr>
           </thead>
           <tbody>
-            <?php while ($row = mysqli_fetch_assoc($orderSearchResults)) : // row here differ from previous defined ?> 
+            <?php while ($row = mysqli_fetch_assoc($orderSearchResults)) : // row here differ from previous defined 
+            ?>
               <tr>
                 <td><?php echo htmlspecialchars($row['OrderID']); ?></td>
                 <td><?php echo htmlspecialchars($row['OrderStatus']); ?></td>
@@ -295,4 +300,5 @@ if (!empty($_GET['search_date'])) {
 
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
