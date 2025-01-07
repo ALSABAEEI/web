@@ -119,8 +119,11 @@ $conn->close();
             </a>
             <nav id="navmenu" class="navmenu">
                 <ul>
-                    <li><a href="dashboard.php">Dashboard</a></li>
-                    <li><a href="orders.php" class="active">Orders</a></li>
+                    <li><a href="Dashboard.php" class="active">Dashboard</a></li>
+                    <li><a href="membership-card.php">Membership Card</a></li>
+                    <li><a href="update-student-info.php">Manage Profile</a></li>
+                    <li><a href="orders.php">Orders</a></li>
+
                 </ul>
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
             </nav>
