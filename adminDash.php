@@ -53,7 +53,7 @@ while ($row = mysqli_fetch_assoc($ordersPerBranchResult)) {
   $orders[] = $row['totalOrders'];
 }
 
-// Fetch data for the pie chart (Revenue per Branch)22222
+// Fetch data for the pie chart (Revenue per Branch)
 $revenuePerBranchQuery = "
     SELECT b.BranchName, SUM(o.OrderTotal) AS revenue
     FROM orders o
