@@ -5,8 +5,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
   header('Location: login.php');
   exit();
 }
-// 433333333333
-// Logout Logicjhjhkjkjgk
+
 if (isset($_GET['logout'])) {
   session_destroy();
   header('Location: login.php');
@@ -135,6 +134,7 @@ if (!empty($_GET['search_date'])) {
       <div class="d-flex align-items-center">
         <span class="text-light me-3">Welcome, <?php echo htmlspecialchars($adminName); ?>!</span>
         <a href="manageBran.php" class="btn btn-sm btn-manage-branch">Manage Branch</a>
+        <a href="manage-students.php" class="btn btn-sm btn-manage-branch">Manage students</a>
         <a href="adminDash.php?logout=true" class="btn btn-sm btn-logout">Log Out</a>
       </div>
     </div>
