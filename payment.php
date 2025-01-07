@@ -28,7 +28,7 @@ if (!empty($selectedPackages)) {
         }
     }
 }
-
+// Calculate the total price
 // Calculate the total price
 $totalPrice = 0;
 foreach ($packages as $package) {
