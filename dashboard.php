@@ -7,55 +7,53 @@ if (!isset($_SESSION['studID']) || empty($_SESSION['studID'])) {
     exit();
 }
 
-// Fetch student ID from the session
 $studID = $_SESSION['studID'];
 
-// Connect to the database
-try {
-    $pdo = new PDO("mysql:host=localhost;dbname=rapidprint", "root", "");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Fetch student details
-    $stmt = $pdo->prepare("SELECT * FROM Student WHERE studID = ?");
-    $stmt->execute([$studID]);
-    $student = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Fetch membership card details
-    $cardStmt = $pdo->prepare("SELECT * FROM MembershipCard WHERE studID = ?");
-    $cardStmt->execute([$studID]);
-    $membershipCard = $cardStmt->fetch(PDO::FETCH_ASSOC);
-
-    // Fetch transactions for the membership card
-    $transactions = [];
-    if ($membershipCard) {
-        $transactionStmt = $pdo->prepare("SELECT * FROM Transactions WHERE CardID = ? ORDER BY Date DESC");
-        $transactionStmt->execute([$membershipCard['CardID']]);
-        $transactions = $transactionStmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // Calculate total orders
-    $orderCountStmt = $pdo->prepare("SELECT COUNT(*) AS OrderCount FROM Orders WHERE studID = ?");
-    $orderCountStmt->execute([$studID]);
-    $orderCount = $orderCountStmt->fetchColumn();
-
-    // Fetch monthly spending
-    $spendingStmt = $pdo->prepare("
-        SELECT MONTH(Date) AS Month, SUM(OrderTotal) AS TotalSpent 
-        FROM Orders 
-        WHERE studID = ? AND YEAR(Date) = YEAR(CURRENT_DATE)
-        GROUP BY MONTH(Date)
-    ");
-    $spendingStmt->execute([$studID]);
-    $monthlySpending = $spendingStmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Prepare an array for all 12 months with zero spending
-    $yearlySpending = array_fill(1, 12, 0);
-    foreach ($monthlySpending as $spending) {
-        $yearlySpending[intval($spending['Month'])] = $spending['TotalSpent'];
-    }
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+// Database connection
+$conn = new mysqli("localhost", "root", "", "rapidprint");
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
+
+// Fetch student details
+$studentQuery = "SELECT * FROM Student WHERE studID = $studID";
+$studentResult = mysqli_query($conn, $studentQuery);
+$student = mysqli_fetch_assoc($studentResult);
+
+// Fetch membership card details
+$cardQuery = "SELECT * FROM MembershipCard WHERE studID = $studID";
+$cardResult = mysqli_query($conn, $cardQuery);
+$membershipCard = mysqli_fetch_assoc($cardResult);
+
+// Fetch transactions for the membership card
+$transactions = [];
+if ($membershipCard) {
+    $transactionQuery = "SELECT * FROM Transactions WHERE CardID = {$membershipCard['CardID']} ORDER BY Date DESC";
+    $transactionResult = mysqli_query($conn, $transactionQuery);
+    while ($row = mysqli_fetch_assoc($transactionResult)) {
+        $transactions[] = $row;
+    }
+}
+
+// Calculate total orders
+$orderQuery = "SELECT COUNT(*) AS OrderCount FROM Orders WHERE studID = $studID";
+$orderResult = mysqli_query($conn, $orderQuery);
+$orderCount = mysqli_fetch_assoc($orderResult)['OrderCount'];
+
+// Fetch monthly spending
+$spendingQuery = "
+    SELECT MONTH(Date) AS Month, SUM(OrderTotal) AS TotalSpent 
+    FROM Orders 
+    WHERE studID = $studID AND YEAR(Date) = YEAR(CURRENT_DATE)
+    GROUP BY MONTH(Date)";
+$spendingResult = mysqli_query($conn, $spendingQuery);
+
+$yearlySpending = array_fill(1, 12, 0);
+while ($row = mysqli_fetch_assoc($spendingResult)) {
+    $yearlySpending[intval($row['Month'])] = $row['TotalSpent'];
+}
+
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -82,7 +80,7 @@ try {
             </a>
             <nav id="navmenu" class="navmenu">
                 <ul>
-                    <li><a href="Dashboard.php">Dashboard</a></li>
+                    <li><a href="Dashboard.php" class="active">Dashboard</a></li>
                     <li><a href="membership-card.php">Membership Card</a></li>
                     <li><a href="update-student-info.php">Manage Profile</a></li>
                 </ul>
@@ -106,7 +104,7 @@ try {
                 <!-- Profile Summary -->
                 <div class="col-lg-4">
                     <div class="card shadow-sm p-3">
-                        <h4 class="mb-3">Profile Summary</h4>
+                        <h4>Profile Summary</h4>
                         <p><strong>Name:</strong> <?= htmlspecialchars($student['UserName']); ?></p>
                         <p><strong>Email:</strong> <?= htmlspecialchars($student['email']); ?></p>
                         <p><strong>Phone:</strong> <?= htmlspecialchars($student['PhoneNumber']); ?></p>
@@ -117,7 +115,7 @@ try {
                 <!-- Membership Card Details -->
                 <div class="col-lg-4">
                     <div class="card shadow-sm p-3">
-                        <h4 class="mb-3">Membership Card</h4>
+                        <h4>Membership Card</h4>
                         <?php if ($membershipCard): ?>
                             <p><strong>Card ID:</strong> <?= htmlspecialchars($membershipCard['CardID']); ?></p>
                             <p><strong>Balance:</strong> RM<?= htmlspecialchars($membershipCard['Balance']); ?></p>
@@ -131,7 +129,7 @@ try {
                 <!-- Total Orders -->
                 <div class="col-lg-4">
                     <div class="card shadow-sm p-3">
-                        <h4 class="mb-3">Orders</h4>
+                        <h4>Orders</h4>
                         <p><strong>Total Orders:</strong> <?= $orderCount; ?></p>
                         <a href="orders.php" class="btn btn-primary mt-2">View All Orders</a>
                     </div>
@@ -142,7 +140,7 @@ try {
                 <!-- Transaction Table -->
                 <div class="col-lg-6">
                     <div class="card shadow-sm p-3">
-                        <h4 class="mb-3">Recent Transactions</h4>
+                        <h4>Recent Transactions</h4>
                         <?php if ($transactions): ?>
                             <table class="table">
                                 <thead>
@@ -156,13 +154,12 @@ try {
                                     <?php foreach ($transactions as $transaction): ?>
                                         <tr>
                                             <td><?= htmlspecialchars($transaction['Date']); ?></td>
-                                            <td>RM<?= htmlspecialchars($transaction['Amount']); ?></td> <!-- Use 'Points' here -->
+                                            <td>RM<?= htmlspecialchars($transaction['Amount']); ?></td>
                                             <td><?= htmlspecialchars($transaction['Type']); ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
-
                         <?php else: ?>
                             <p>No transactions found.</p>
                         <?php endif; ?>
@@ -172,7 +169,7 @@ try {
                 <!-- Monthly Spending Chart -->
                 <div class="col-lg-6">
                     <div class="card shadow-sm p-3">
-                        <h4 class="mb-3">Monthly Spending</h4>
+                        <h4>Monthly Spending</h4>
                         <canvas id="spendingChart"></canvas>
                     </div>
                 </div>
@@ -195,7 +192,6 @@ try {
                 datasets: [{
                     label: 'Monthly Spending (RM)',
                     data: data,
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 2,
                     tension: 0.4
@@ -204,33 +200,16 @@ try {
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    tooltip: {
-                        enabled: true
-                    }
+                    legend: { display: true },
+                    tooltip: { enabled: true }
                 },
                 scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Months of the Year'
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Total Spending (RM)'
-                        }
-                    }
+                    x: { title: { display: true, text: 'Months' } },
+                    y: { beginAtZero: true, title: { display: true, text: 'Spending (RM)' } }
                 }
             }
         });
     </script>
-
 </body>
 
 </html>
