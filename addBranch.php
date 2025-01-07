@@ -2,11 +2,11 @@
 session_start();
 
 if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    header('Location: login.php');
-    exit();
+  header('Location: login.php');
+  exit();
 }
 
-// Inline database connection
+// Inline database connection 1231321321
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -15,51 +15,53 @@ $dbname = "rapidprint";
 $conn = mysqli_connect($servername, $username, $password, $dbname);
 
 if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
+  die("Connection failed: " . mysqli_connect_error());
 }
 
 // Fetch all admin names for the dropdown
 $adminQuery = "SELECT adminID, UserName FROM admin";
 $adminResult = mysqli_query($conn, $adminQuery);
 if (!$adminResult) {
-    die("Error fetching admins: " . mysqli_error($conn));
+  die("Error fetching admins: " . mysqli_error($conn));
 }
 
 // Handle form submission
 $message = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $adminID = intval($_POST['adminID']); // Ensure adminID is a valid integer
-    $branchName = trim($_POST['branchName']); // Remove extra spaces
-    $location = trim($_POST['location']); // Remove extra spaces
-    $contactInfo = trim($_POST['contactInfo']); // Remove extra spaces
+  $adminID = intval($_POST['adminID']); // Ensure adminID is a valid integer
+  $branchName = trim($_POST['branchName']); // Remove extra spaces
+  $location = trim($_POST['location']); // Remove extra spaces
+  $contactInfo = trim($_POST['contactInfo']); // Remove extra spaces
 
-    // Validate inputs
-    if (empty($adminID) || empty($branchName) || empty($location) || empty($contactInfo)) {
-        $message = "All fields are required.";
-    } else {
-        // Insert query
-        $query = "INSERT INTO branch (adminID, BranchName, Location, ContactInfo) 
+  // Validate inputs
+  if (empty($adminID) || empty($branchName) || empty($location) || empty($contactInfo)) {
+    $message = "All fields are required.";
+  } else {
+    // Insert query
+    $query = "INSERT INTO branch (adminID, BranchName, Location, ContactInfo) 
                   VALUES ($adminID, '$branchName', '$location', '$contactInfo')";
-        
-        // Execute query
-        if (mysqli_query($conn, $query)) {
-            $message = "Branch added successfully!";
-        } else {
-            $message = "Error adding branch: " . mysqli_error($conn);
-        }
+
+    // Execute query
+    if (mysqli_query($conn, $query)) {
+      $message = "Branch added successfully!";
+    } else {
+      $message = "Error adding branch: " . mysqli_error($conn);
     }
+  }
 }
 
 ?>
 
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Add New Branch</title>
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body>
   <div class="container mt-5">
     <h1 class="mb-4">Add New Branch</h1>
@@ -99,4 +101,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
   </div>
 </body>
+
 </html>
