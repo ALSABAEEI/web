@@ -6,14 +6,14 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
     exit();
 }
 
-// Logout Logicjhjhkjkjgk
+// Logout Logicjhjh
 if (isset($_GET['logout'])) {
     session_destroy();
     header('Location: login.php');
     exit();
 }
 
-// Get the admin's name from the session
+// Get the admin's name from the session 22222222222222222222
 $adminName = isset($_SESSION['admin_name']) ? $_SESSION['admin_name'] : "Admin";
 
 // Database connection
