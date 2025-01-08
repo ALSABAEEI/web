@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
 
         // Generate QR Code
-        $orderDetailsURL = "http://localhost/web/web/gp-1.0.0/orderDetails.php?orderID=$orderID";
+        $orderDetailsURL = "http://localhost/web/orderDetails.php?orderID=$orderID";
         $qrCodePath = "qrcodes/order_$orderID.png";
         if (!is_dir("qrcodes")) {
             mkdir("qrcodes", 0777, true);
