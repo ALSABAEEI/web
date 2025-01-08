@@ -205,7 +205,7 @@ if (!empty($_GET['search_date'])) {
           data: {
             labels: branchesForRevenue, //branches names
             datasets: [{
-              data: revenues, //names for each peice in the pie chart
+              data: revenues, //revenue for each peice in the pie
               backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)']
             }]
           }
@@ -256,7 +256,7 @@ if (!empty($_GET['search_date'])) {
             </tr>
           </thead>
           <tbody>
-            <?php while ($row = mysqli_fetch_assoc($orderSearchResults)) : // row here differ from previous defined 
+            <?php while ($row = mysqli_fetch_assoc($orderSearchResults)) : // row differ from pre defined 
             ?>
               <tr>
                 <td><?php echo htmlspecialchars($row['OrderID']); ?></td>
