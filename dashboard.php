@@ -33,7 +33,7 @@ if ($membershipCard) {
     }
 }
 
-// Calculate orders
+// calc orders
 $orderQuery = "SELECT COUNT(*) AS OrderCount FROM Orders WHERE studID = $studID";
 $orderResult = mysqli_query($conn, $orderQuery);
 $orderCount = mysqli_fetch_assoc($orderResult)['OrderCount'];
