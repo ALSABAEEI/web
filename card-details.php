@@ -1,20 +1,17 @@
 <?php
-// Database connection
 $conn = new mysqli("localhost", "root", "", "rapidprint");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Get the CardID from the query string
 if (isset($_GET['CardID'])) {
     $cardID = intval($_GET['CardID']);
 
-    // Fetch card details
+
     $cardQuery = "SELECT * FROM MembershipCard WHERE CardID = $cardID";
     $cardResult = mysqli_query($conn, $cardQuery);
     $card = mysqli_fetch_assoc($cardResult);
 
-    // Fetch transactions
     $transactions = [];
     $transactionQuery = "SELECT * FROM Transactions WHERE CardID = $cardID ORDER BY Date DESC";
     $transactionResult = mysqli_query($conn, $transactionQuery);
