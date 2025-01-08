@@ -29,7 +29,7 @@ if (!$conn) {
 
 // Fetch data for the header section
 $totalBranchesQuery = "SELECT COUNT(BranchID) AS totalBranches FROM branch";
-$totalBranchesResult = mysqli_query($conn, $totalBranchesQuery); // to run the query
+$totalBranchesResult = mysqli_query($conn, $totalBranchesQuery); 
 $totalBranches = mysqli_fetch_assoc($totalBranchesResult)['totalBranches'];
 
 $totalPackagesQuery = "SELECT COUNT(PackageID) AS totalPackages FROM package";
@@ -70,25 +70,25 @@ while ($row = mysqli_fetch_assoc($revenuePerBranchResult)) {
 // Handle Order Status Search
 $orderSearchResults = [];
 if (!empty($_GET['order_status'])) {
-  $orderStatus = trim($_GET['order_status']); // Clean the input
+  $orderStatus = trim($_GET['order_status']); 
   $orderStatusQuery = "
     SELECT orders.*, branch.BranchName 
     FROM orders 
     LEFT JOIN branch ON orders.BranchID = branch.BranchID 
-    WHERE orders.OrderStatus = '$orderStatus'"; // Directly insert the value into the query
-  $orderSearchResults = mysqli_query($conn, $orderStatusQuery); // Execute the query
+    WHERE orders.OrderStatus = '$orderStatus'"; 
+  $orderSearchResults = mysqli_query($conn, $orderStatusQuery); 
 }
 
 // Handle Date-based Search
 $dateSearchResults = [];
 if (!empty($_GET['search_date'])) {
-  $searchDate = trim($_GET['search_date']); // Clean the input
+  $searchDate = trim($_GET['search_date']); 
   $dateQuery = "
     SELECT orders.*, branch.BranchName 
     FROM orders 
     LEFT JOIN branch ON orders.BranchID = branch.BranchID 
-    WHERE orders.Date = '$searchDate'"; // Directly insert the value into the query
-  $dateSearchResults = mysqli_query($conn, $dateQuery); // Execute the query
+    WHERE orders.Date = '$searchDate'"; 
+  $dateSearchResults = mysqli_query($conn, $dateQuery); 
 }
 
 ?>
