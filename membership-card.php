@@ -118,6 +118,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_funds'])) {
     }
 }
 
+// search
+if  (isset($_POST['search'])) {
+    $searchID = $_POST['searchCardID'];
+    $sQuery = "SELECT Balance FROM MembershipCard WHERE CardID = $searchID";
+    $sResult = mysqli_query($conn, $sQuery);
+    $searchCard = mysqli_fetch_assoc($sResult);
+
+    if ($searchCard) {
+        $message = "Balance for Card $searchID: RM" . $searchCard['Balance'];
+    } else {
+        $message = "Card ID $searchCardID not found.";
+    }
+}
+
+
 
 $conn->close();
 ?>
@@ -169,9 +184,22 @@ $conn->close();
                 <div class="card shadow-sm p-4 mx-auto" style="max-width: 500px;">
                     <h4 class="card-title">Membership Card Details</h4>
                     <p><strong>Card ID:</strong> <?= htmlspecialchars($card['CardID']); ?></p>
-                    <p><strong>Balance:</strong> RM<?= number_format($card['Balance'], 2); ?></p>
                     <p><strong>QR Code:</strong></p>
                     <img src="<?= htmlspecialchars($card['QRCode']) . '?t=' . time(); ?>" alt="QR Code" class="img-fluid">
+
+                    <div class="card shadow-sm p-4 mx-auto mb-4" style="max-width: 500px;">
+
+                    <!--  (search) -->
+    <h4 class="card-title">Search Membership Card</h4>
+    <form method="POST" action="">
+        <div class="mb-3">
+            <label for="searchCardID" class="form-label">Enter Card ID</label>
+            <input type="number" class="form-control" id="searchCardID" name="searchCardID" placeholder="Card ID" required>
+        </div>
+        <button type="submit" name="search" class="btn btn-primary w-100">Search</button>
+    </form>
+</div>
+
 
                     <!-- add funds -->
                     <form method="POST" action="" class="mt-3">

@@ -26,7 +26,14 @@ $membershipCard = mysqli_fetch_assoc($cardResult);
 // get transactions 
 $transactions = [];
 if ($membershipCard) {
-    $transactionQuery = "SELECT * FROM Transactions WHERE CardID = {$membershipCard['CardID']} ORDER BY Date DESC";
+    $transactionQuery = $transactionQuery = "
+        SELECT transc.*, mem.Balance 
+        FROM Transactions transc
+        JOIN MembershipCard mem ON transc.CardID = mem.CardID
+        WHERE transc.CardID = {$membershipCard['CardID']}
+        ORDER BY transc.Date DESC;
+        ";
+
     $transactionResult = mysqli_query($conn, $transactionQuery);
     while ($row = mysqli_fetch_assoc($transactionResult)) {
         $transactions[] = $row;
