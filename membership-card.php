@@ -16,7 +16,7 @@ if ($conn->connect_error) {
 $studID = $_SESSION['studID'] ?? null;
 $message = "";
 $card = null;
-$qrDirectory = "qrcodes/"; 
+$qrDirectory = "qrcodes/";
 
 //  QR directory
 if (!file_exists($qrDirectory)) {
@@ -31,7 +31,8 @@ if ($studID) {
 }
 
 // regenerate QR code
-function regenerateQRCode($studID, $qrDirectory, $conn) {
+function regenerateQRCode($studID, $qrDirectory, $conn)
+{
     // get the new balance
     $query = "SELECT Balance FROM MembershipCard WHERE studID = $studID";
     $result = mysqli_query($conn, $query); // Pass the $conn (mysqli object) correctly here
@@ -63,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_card'])) {
     // QR code
     regenerateQRCode($studID, $qrDirectory, $conn);
 
-   
+
     $stmt = "INSERT INTO MembershipCard (studID, QRCode, Balance) VALUES ($studID, 'qrcodes/card_" . $studID . ".png', $balance)";
     if (mysqli_query($conn, $stmt)) {
         header("Location: membership-card.php");
@@ -80,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_card'])) {
     $cardID = $_POST['cardID'];
     $stmt = "DELETE FROM MembershipCard WHERE CardID = $cardID";
     if (mysqli_query($conn, $stmt)) {
-        
+
         if (file_exists($card['QRCode'])) {
             unlink($card['QRCode']);
         }
@@ -100,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_funds'])) {
         // Update balance
         $stmt = "UPDATE MembershipCard SET Balance = Balance + $amount WHERE CardID = $cardID";
         if (mysqli_query($conn, $stmt)) {
-            
+
             $transactionStmt = "INSERT INTO transactions (CardID, Type, Amount, Date) VALUES ($cardID, 'Add Funds', $amount, '$currDate')";
             mysqli_query($conn, $transactionStmt);
 
@@ -143,9 +144,11 @@ $conn->close();
             </a>
             <nav id="navmenu" class="navmenu">
                 <ul>
-                    <li><a href="Dashboard.php">Dashboard</a></li>
-                    <li><a href="membership-card.php" class="active">Membership Card</a></li>
+                    <li><a href="Dashboard.php" class="active">Dashboard</a></li>
+                    <li><a href="membership-card.php">Membership Card</a></li>
                     <li><a href="update-student-info.php">Manage Profile</a></li>
+                    <li><a href="orders.php">Orders</a></li>
+
                 </ul>
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
             </nav>

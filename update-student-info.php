@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // file upload
     $target_dir = __DIR__ . "/uploads/";
     if (!is_dir($target_dir)) {
-        mkdir($target_dir, 0777, true); 
+        mkdir($target_dir, 0777, true);
     }
 
     $target_file = $target_dir . basename($_FILES["student_card"]["name"]);
@@ -94,7 +94,8 @@ $conn->close();
 </head>
 
 <body>
-<header id="header" class="header d-flex align-items-center">
+    <!-- Header -->
+    <header id="header" class="header d-flex align-items-center">
         <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
             <a href="dashboard.php" class="logo d-flex align-items-center">
                 <h1 class="sitename">RP</h1>
@@ -102,9 +103,11 @@ $conn->close();
             </a>
             <nav id="navmenu" class="navmenu">
                 <ul>
-                    <li><a href="Dashboard.php">Dashboard</a></li>
-                    <li><a href="membership-card.php" >Membership Card</a></li>
-                    <li><a href="update-student-info.php" class="active">Manage Profile</a></li>
+                    <li><a href="Dashboard.php" class="active">Dashboard</a></li>
+                    <li><a href="membership-card.php">Membership Card</a></li>
+                    <li><a href="update-student-info.php">Manage Profile</a></li>
+                    <li><a href="orders.php">Orders</a></li>
+
                 </ul>
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
             </nav>
@@ -151,7 +154,7 @@ $conn->close();
                         <label for="student_card" class="form-label">Upload Student Card</label>
                         <input type="file" class="form-control" id="student_card" name="student_card">
                         <?php if (!empty($student['StudentCard'])) : ?>
-                            <p class="mt-2">Current File: 
+                            <p class="mt-2">Current File:
                                 <a href="uploads/<?= htmlspecialchars($student['StudentCard']); ?>" target="_blank">
                                     <?= htmlspecialchars($student['StudentCard']); ?>
                                 </a>
