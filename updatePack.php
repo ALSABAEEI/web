@@ -27,7 +27,7 @@ if ($packageID === 0 || $branchID === 0) {
 }
 
 // Fetch package details for pre-filling the form
-$query = "SELECT PackageName, Description, Price FROM package WHERE PackageID = $packageID"; // Direct query
+$query = "SELECT PackageName, Description, Price FROM package WHERE PackageID = $packageID"; 
 $result = mysqli_query($conn, $query);
 
 if ($result && mysqli_num_rows($result) > 0) {
@@ -39,9 +39,9 @@ if ($result && mysqli_num_rows($result) > 0) {
 // Handle form submission
 $message = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $packageName = trim($_POST['packageName']); // Sanitize input
-    $description = trim($_POST['description']); // Sanitize input
-    $price = floatval($_POST['price']); // Ensure price is a float
+    $packageName = trim($_POST['packageName']); 
+    $description = trim($_POST['description']); 
+    $price = floatval($_POST['price']); 
 
     // Validate inputs
     if (empty($packageName) || empty($description) || $price <= 0) {
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Update query
         $updateQuery = "UPDATE package 
                         SET PackageName = '$packageName', Description = '$description', Price = $price 
-                        WHERE PackageID = $packageID"; // Direct query
+                        WHERE PackageID = $packageID";
 
         if (mysqli_query($conn, $updateQuery)) {
             $message = "Package updated successfully!";

@@ -35,8 +35,8 @@ if ($branchID === 0) {
 // Handle form submission
 $message = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $packageName = trim($_POST['packageName']); // Remove extra spaces
-    $description = trim($_POST['description']); // Remove extra spaces
+    $packageName = trim($_POST['packageName']);
+    $description = trim($_POST['description']); 
     $price = floatval($_POST['price']); // Ensure price is a valid float
     $branchID = intval($_POST['branchID']); // Ensure branchID is a valid integer
 

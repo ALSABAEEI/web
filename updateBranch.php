@@ -24,7 +24,7 @@ $message = "";
 
 // Fetch branch details for pre-filling the form
 if ($branchID > 0) {
-  $query = "SELECT BranchName, Location, ContactInfo FROM branch WHERE BranchID = $branchID"; // Direct query
+  $query = "SELECT BranchName, Location, ContactInfo FROM branch WHERE BranchID = $branchID"; 
   $result = mysqli_query($conn, $query);
 
   if ($result && mysqli_num_rows($result) > 0) {
@@ -36,9 +36,9 @@ if ($branchID > 0) {
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $branchName = trim($_POST['branchName']); // Sanitize input
-  $location = trim($_POST['location']);    // Sanitize input
-  $contactInfo = trim($_POST['contactInfo']); // Sanitize input
+  $branchName = trim($_POST['branchName']); 
+  $location = trim($_POST['location']);    
+  $contactInfo = trim($_POST['contactInfo']); 
 
   // Validate inputs
   if (empty($branchName) || empty($location) || empty($contactInfo)) {

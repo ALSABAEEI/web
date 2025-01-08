@@ -38,7 +38,7 @@ if ($branchID === 0) {
 
 // Fetch packages for the selected branch
 $query = "SELECT PackageID, PackageName, Description, Price FROM package WHERE BranchID = $branchID";
-$result = mysqli_query($conn, $query); // Execute the query
+$result = mysqli_query($conn, $query); 
 
 if (!$result) {
   die("Database query failed: " . mysqli_error($conn));
@@ -46,7 +46,7 @@ if (!$result) {
 
 // Fetch branch name for display
 $branchQuery = "SELECT BranchName FROM branch WHERE BranchID = $branchID";
-$branchResult = mysqli_query($conn, $branchQuery); // Execute the query
+$branchResult = mysqli_query($conn, $branchQuery); 
 $branch = mysqli_fetch_assoc($branchResult);
 $branchName = $branch ? htmlspecialchars($branch['BranchName']) : "Unknown";
 ?>

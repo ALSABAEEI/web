@@ -30,8 +30,8 @@ $message = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $adminID = intval($_POST['adminID']); // Ensure adminID is a valid integer
   $branchName = trim($_POST['branchName']); // Remove extra spaces
-  $location = trim($_POST['location']); // Remove extra spaces
-  $contactInfo = trim($_POST['contactInfo']); // Remove extra spaces
+  $location = trim($_POST['location']); 
+  $contactInfo = trim($_POST['contactInfo']); 
 
   // Validate inputs
   if (empty($adminID) || empty($branchName) || empty($location) || empty($contactInfo)) {
