@@ -80,11 +80,30 @@ if (isset($_POST['delete_order'])) {
 
 // Fetch user orders
 $userOrders = [];
+$searchQuery = "";
+$searchTerm = "";
+
+// Check for search parameters
+if (!empty($_GET['search_date'])) {
+    $searchDate = $_GET['search_date'];
+    $searchQuery = " AND o.Date = ?";
+    $searchTerm = $searchDate;
+} elseif (!empty($_GET['search_file'])) {
+    $searchFile = "%" . $_GET['search_file'] . "%";
+    $searchQuery = " AND o.Upload_File LIKE ?";
+    $searchTerm = $searchFile;
+}
+
 $orderQuery = "SELECT o.OrderID, o.OrderTotal, o.OrderStatus, o.Upload_File, o.Date, o.QRCodePath
                FROM orders o
-               WHERE o.studID = ?";
+               WHERE o.studID = ?" . $searchQuery;
+
 $stmt = $conn->prepare($orderQuery);
-$stmt->bind_param("i", $studID);
+if ($searchQuery) {
+    $stmt->bind_param("is", $studID, $searchTerm);
+} else {
+    $stmt->bind_param("i", $studID);
+}
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -123,7 +142,6 @@ $conn->close();
                     <li><a href="membership-card.php">Membership Card</a></li>
                     <li><a href="update-student-info.php">Manage Profile</a></li>
                     <li><a href="orders.php">Orders</a></li>
-
                 </ul>
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
             </nav>
@@ -142,6 +160,22 @@ $conn->close();
                     <?= htmlspecialchars($_GET['success']); ?>
                 </div>
             <?php endif; ?>
+
+            <!-- Search Section -->
+            <div class="mb-4">
+                <form method="GET" action="" class="d-inline-block">
+                    <div class="input-group">
+                        <input type="date" name="search_date" class="form-control" placeholder="Search by Date">
+                        <button type="submit" class="btn btn-primary">Search by Date</button>
+                    </div>
+                </form>
+                <form method="GET" action="" class="d-inline-block ms-3">
+                    <div class="input-group">
+                        <input type="text" name="search_file" class="form-control" placeholder="Search by File Name">
+                        <button type="submit" class="btn btn-secondary">Search by File Name</button>
+                    </div>
+                </form>
+            </div>
 
             <!-- Add Order Button -->
             <div class="mb-3">
@@ -189,7 +223,6 @@ $conn->close();
                                     </form>
                                 <?php endif; ?>
                             </td>
-
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
