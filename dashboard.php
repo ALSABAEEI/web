@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Check if the student is logged in
 if (!isset($_SESSION['studID']) || empty($_SESSION['studID'])) {
     header('Location: login.php');
     exit();
@@ -9,23 +8,22 @@ if (!isset($_SESSION['studID']) || empty($_SESSION['studID'])) {
 
 $studID = $_SESSION['studID'];
 
-// Database connection
 $conn = new mysqli("localhost", "root", "", "rapidprint");
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch student details
+// get student 
 $studentQuery = "SELECT * FROM Student WHERE studID = $studID";
 $studentResult = mysqli_query($conn, $studentQuery);
 $student = mysqli_fetch_assoc($studentResult);
 
-// Fetch membership card details
+// get membership card 
 $cardQuery = "SELECT * FROM MembershipCard WHERE studID = $studID";
 $cardResult = mysqli_query($conn, $cardQuery);
 $membershipCard = mysqli_fetch_assoc($cardResult);
 
-// Fetch transactions for the membership card
+// get transactions 
 $transactions = [];
 if ($membershipCard) {
     $transactionQuery = "SELECT * FROM Transactions WHERE CardID = {$membershipCard['CardID']} ORDER BY Date DESC";
@@ -35,12 +33,12 @@ if ($membershipCard) {
     }
 }
 
-// Calculate total orders
+// Calculate orders
 $orderQuery = "SELECT COUNT(*) AS OrderCount FROM Orders WHERE studID = $studID";
 $orderResult = mysqli_query($conn, $orderQuery);
 $orderCount = mysqli_fetch_assoc($orderResult)['OrderCount'];
 
-// Fetch monthly spending
+// get monthly spending
 $spendingQuery = "
     SELECT MONTH(Date) AS Month, SUM(OrderTotal) AS TotalSpent 
     FROM Orders 
@@ -142,7 +140,7 @@ $conn->close();
                 <!-- Transaction Table -->
                 <div class="col-lg-6">
                     <div class="card shadow-sm p-3">
-                        <h4>Recent Transactions</h4>
+                        <h4>Recent MembershipCard Activities</h4>
                         <?php if ($transactions): ?>
                             <table class="table">
                                 <thead>
