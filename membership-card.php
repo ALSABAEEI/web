@@ -18,55 +18,54 @@ $message = "";
 $card = null;
 $qrDirectory = "qrcodes/";
 
-//  QR directory
 if (!file_exists($qrDirectory)) {
     mkdir($qrDirectory, 0777, true);
 }
 
-// get membership card details
-if ($studID) {
-    $query = "SELECT * FROM MembershipCard WHERE studID = $studID";
-    $result = mysqli_query($conn, $query);
+// get membership card 
+$query = "SELECT * FROM MembershipCard WHERE studID = $studID";
+$result = mysqli_query($conn, $query);
+
+if ($result && mysqli_num_rows($result) > 0) {
     $card = mysqli_fetch_assoc($result);
+} else {
+    $card = null; 
 }
 
-// generate new QR code function
-function regenerateQRCode($studID, $qrDirectory, $conn)
+// regenerate qr code
+function regenerateQRCode($cardID, $balance, $qrDirectory)
 {
-    // get new balance
-    $query = "SELECT Balance FROM MembershipCard WHERE studID = $studID";
-    $result = mysqli_query($conn, $query); // Pass the $conn (mysqli object) correctly here
-    $card = mysqli_fetch_assoc($result);
+    $qrValue = "http://localhost/Web/card-details.php?CardID=" . urlencode($cardID);
+    $qrFilePath = $qrDirectory . "card_" . $cardID . ".png";
 
-    if ($card) {
-        $balance = $card['Balance'];
-        $qrValue = "Student ID: $studID, Balance: RM" . number_format($balance, 2);
-        $qrFilePath = $qrDirectory . "card_" . $studID . ".png";
+    // QR code image
+    QRcode::png($qrValue, $qrFilePath, QR_ECLEVEL_H, 4);
 
-        // generate the QR code image 
-        QRcode::png($qrValue, $qrFilePath, QR_ECLEVEL_H, 4);
-
-        return $qrFilePath;
-    }
-
-    return null;
+    return $qrFilePath;
 }
 
+if ($card) {
+    $qrFilePath = regenerateQRCode($card['CardID'], $card['Balance'], $qrDirectory);
+    $updateQuery = "UPDATE MembershipCard SET QRCode = '$qrFilePath' WHERE CardID = {$card['CardID']}";
+    mysqli_query($conn, $updateQuery);
+}
 
-// with each refresh
-regenerateQRCode($studID, $qrDirectory, $conn);
-
-
-//  card creation
+//  card create
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_card'])) {
     $balance = 0.00;
 
-    // QR code
-    regenerateQRCode($studID, $qrDirectory, $conn);
-
-
-    $stmt = "INSERT INTO MembershipCard (studID, QRCode, Balance) VALUES ($studID, 'qrcodes/card_" . $studID . ".png', $balance)";
+    $stmt = "INSERT INTO MembershipCard (studID, QRCode, Balance) VALUES ($studID, '', $balance)";
     if (mysqli_query($conn, $stmt)) {
+        //  the new created card
+        $newCardID = mysqli_insert_id($conn);
+
+        
+        $qrFilePath = regenerateQRCode($newCardID, $balance, $qrDirectory);
+
+        
+        $updateQuery = "UPDATE MembershipCard SET QRCode = '$qrFilePath' WHERE CardID = $newCardID";
+        mysqli_query($conn, $updateQuery);
+
         header("Location: membership-card.php");
         exit();
     } else {
@@ -74,14 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_card'])) {
     }
 }
 
-
-
-//  card cancellation
+//  card cancel
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_card'])) {
     $cardID = $_POST['cardID'];
     $stmt = "DELETE FROM MembershipCard WHERE CardID = $cardID";
     if (mysqli_query($conn, $stmt)) {
-
         if (file_exists($card['QRCode'])) {
             unlink($card['QRCode']);
         }
@@ -98,15 +94,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_funds'])) {
     $amount = $_POST['amount'];
     $currDate = date('Y-m-d H:i:s');
     if ($amount > 0) {
-        // to update the balance
         $stmt = "UPDATE MembershipCard SET Balance = Balance + $amount WHERE CardID = $cardID";
         if (mysqli_query($conn, $stmt)) {
-
             $transactionStmt = "INSERT INTO transactions (CardID, Type, Amount, Date) VALUES ($cardID, 'Add Funds', $amount, '$currDate')";
             mysqli_query($conn, $transactionStmt);
 
-            // new QR code with new balance
-            regenerateQRCode($studID, $qrDirectory, $conn);
+            $query = "SELECT * FROM MembershipCard WHERE CardID = $cardID";
+            $result = mysqli_query($conn, $query);
+            $card = mysqli_fetch_assoc($result);
+
+            regenerateQRCode($cardID, $card['Balance'], $qrDirectory);
 
             header("Location: membership-card.php?success=1");
             exit();
@@ -132,10 +129,10 @@ if  (isset($_POST['search'])) {
     }
 }
 
-
-
 $conn->close();
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">
