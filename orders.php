@@ -84,10 +84,21 @@ $searchQuery = "";
 $searchTerm = "";
 
 // Check for search parameters
-if (!empty($_GET['search_date'])) {
-    $searchDate = $_GET['search_date'];
-    $searchQuery = " AND o.Date = ?";
-    $searchTerm = $searchDate;
+if (!empty($_GET['price_range'])) {
+    $priceRange = $_GET['price_range'];
+    switch ($priceRange) {
+        case "below_100":
+            $searchQuery = " AND o.OrderTotal < 100";
+            break;
+        case "100_200":
+            $searchQuery = " AND o.OrderTotal BETWEEN 100 AND 200";
+            break;
+        case "above_300":
+            $searchQuery = " AND o.OrderTotal > 300";
+            break;
+        default:
+            $searchQuery = "";
+    }
 } elseif (!empty($_GET['search_file'])) {
     $searchFile = "%" . $_GET['search_file'] . "%";
     $searchQuery = " AND o.Upload_File LIKE ?";
@@ -99,7 +110,7 @@ $orderQuery = "SELECT o.OrderID, o.OrderTotal, o.OrderStatus, o.Upload_File, o.D
                WHERE o.studID = ?" . $searchQuery;
 
 $stmt = $conn->prepare($orderQuery);
-if ($searchQuery) {
+if ($searchQuery && strpos($searchQuery, "LIKE") !== false) {
     $stmt->bind_param("is", $studID, $searchTerm);
 } else {
     $stmt->bind_param("i", $studID);
@@ -165,8 +176,13 @@ $conn->close();
             <div class="mb-4">
                 <form method="GET" action="" class="d-inline-block">
                     <div class="input-group">
-                        <input type="date" name="search_date" class="form-control" placeholder="Search by Date">
-                        <button type="submit" class="btn btn-primary">Search by Date</button>
+                        <select name="price_range" class="form-select">
+                            <option value="" selected disabled>Search by Price Range</option>
+                            <option value="below_100">Below $100</option>
+                            <option value="100_200">$100 - $200</option>
+                            <option value="above_300">Above $300</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">Search</button>
                     </div>
                 </form>
                 <form method="GET" action="" class="d-inline-block ms-3">
