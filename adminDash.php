@@ -29,7 +29,7 @@ if (!$conn) {
 
 // Fetch data for the header section
 $totalBranchesQuery = "SELECT COUNT(BranchID) AS totalBranches FROM branch";
-$totalBranchesResult = mysqli_query($conn, $totalBranchesQuery); 
+$totalBranchesResult = mysqli_query($conn, $totalBranchesQuery);
 $totalBranches = mysqli_fetch_assoc($totalBranchesResult)['totalBranches'];
 
 $totalPackagesQuery = "SELECT COUNT(PackageID) AS totalPackages FROM package";
@@ -67,28 +67,55 @@ while ($row = mysqli_fetch_assoc($revenuePerBranchResult)) {
   $revenues[] = $row['revenue'];
 }
 
+// Fetch data for Monthly Orders Trend (Line Chart)
+$monthlyOrdersQuery = "
+  SELECT DATE_FORMAT(Date, '%Y-%m') AS Month, COUNT(OrderID) AS TotalOrders
+  FROM orders
+  GROUP BY Month
+  ORDER BY Month";
+$monthlyOrdersResult = mysqli_query($conn, $monthlyOrdersQuery);
+$months = [];
+$monthlyOrders = [];
+while ($row = mysqli_fetch_assoc($monthlyOrdersResult)) {
+  $months[] = $row['Month'];
+  $monthlyOrders[] = $row['TotalOrders'];
+}
+
+// Fetch data for Order Status Distribution (Doughnut Chart)
+$orderStatusQuery = "
+  SELECT OrderStatus, COUNT(OrderID) AS TotalOrders
+  FROM orders
+  GROUP BY OrderStatus";
+$orderStatusResult = mysqli_query($conn, $orderStatusQuery);
+$orderStatuses = [];
+$orderStatusCounts = [];
+while ($row = mysqli_fetch_assoc($orderStatusResult)) {
+  $orderStatuses[] = $row['OrderStatus'];
+  $orderStatusCounts[] = $row['TotalOrders'];
+}
+
 // Handle Order Status Search
 $orderSearchResults = [];
 if (!empty($_GET['order_status'])) {
-  $orderStatus = trim($_GET['order_status']); 
+  $orderStatus = trim($_GET['order_status']);
   $orderStatusQuery = "
     SELECT orders.*, branch.BranchName 
     FROM orders 
     LEFT JOIN branch ON orders.BranchID = branch.BranchID 
-    WHERE orders.OrderStatus = '$orderStatus'"; 
-  $orderSearchResults = mysqli_query($conn, $orderStatusQuery); 
+    WHERE orders.OrderStatus = '$orderStatus'";
+  $orderSearchResults = mysqli_query($conn, $orderStatusQuery);
 }
 
 // Handle Date-based Search
 $dateSearchResults = [];
 if (!empty($_GET['search_date'])) {
-  $searchDate = trim($_GET['search_date']); 
+  $searchDate = trim($_GET['search_date']);
   $dateQuery = "
     SELECT orders.*, branch.BranchName 
     FROM orders 
     LEFT JOIN branch ON orders.BranchID = branch.BranchID 
-    WHERE orders.Date = '$searchDate'"; 
-  $dateSearchResults = mysqli_query($conn, $dateQuery); 
+    WHERE orders.Date = '$searchDate'";
+  $dateSearchResults = mysqli_query($conn, $dateQuery);
 }
 
 ?>
@@ -164,7 +191,7 @@ if (!empty($_GET['search_date'])) {
           <div class="card text-white bg-info mb-3">
             <div class="card-body">
               <h5 class="card-title">Total Revenue (RM)</h5>
-              <p class="card-text"><?php echo number_format($totalRevenue, 2); ?></p> <!-- commas, decimal -->
+              <p class="card-text"><?php echo number_format($totalRevenue, 2); ?></p>
             </div>
           </div>
         </div>
@@ -207,6 +234,47 @@ if (!empty($_GET['search_date'])) {
             datasets: [{
               data: revenues, //revenue for each peice in the pie
               backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)']
+            }]
+          }
+        });
+      </script>
+      <br><br>
+      <hr>
+      <h4>Monthly Orders Trend</h4>
+      <canvas id="monthlyOrdersChart"></canvas>
+      <script>
+        const months = <?php echo json_encode($months); ?>;
+        const monthlyOrders = <?php echo json_encode($monthlyOrders); ?>;
+        const ctx3 = document.getElementById('monthlyOrdersChart').getContext('2d');
+        new Chart(ctx3, {
+          type: 'line',
+          data: {
+            labels: months,
+            datasets: [{
+              label: 'Monthly Orders',
+              data: monthlyOrders,
+              borderColor: 'rgba(75, 192, 192, 1)',
+              fill: false,
+              tension: 0.1
+            }]
+          }
+        });
+      </script>
+      <br><br>
+      <hr>
+      <h4>Order Status Distribution</h4>
+      <canvas id="orderStatusChart"></canvas>
+      <script>
+        const orderStatuses = <?php echo json_encode($orderStatuses); ?>;
+        const orderStatusCounts = <?php echo json_encode($orderStatusCounts); ?>;
+        const ctx4 = document.getElementById('orderStatusChart').getContext('2d');
+        new Chart(ctx4, {
+          type: 'doughnut',
+          data: {
+            labels: orderStatuses,
+            datasets: [{
+              data: orderStatusCounts,
+              backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 192, 0.6)']
             }]
           }
         });
@@ -256,8 +324,7 @@ if (!empty($_GET['search_date'])) {
             </tr>
           </thead>
           <tbody>
-            <?php while ($row = mysqli_fetch_assoc($orderSearchResults)) : // row differ from pre defined 
-            ?>
+            <?php while ($row = mysqli_fetch_assoc($orderSearchResults)) : ?>
               <tr>
                 <td><?php echo htmlspecialchars($row['OrderID']); ?></td>
                 <td><?php echo htmlspecialchars($row['OrderStatus']); ?></td>
