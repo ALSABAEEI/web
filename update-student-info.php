@@ -91,6 +91,8 @@ $conn->close();
     <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
     <link href="assets/css/main.css" rel="stylesheet">
+
+    
 </head>
 
 <body>
@@ -171,6 +173,15 @@ $conn->close();
     </main>
 
     <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.querySelector('form').addEventListener('submit', function (e) {
+        const confirmation = confirm("Are you sure you want to update your information?");
+        if (!confirmation) {
+            e.preventDefault(); // Prevent form submission if user cancels
+        }
+    });
+</script>
+
 </body>
 
 </html>

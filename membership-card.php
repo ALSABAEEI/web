@@ -115,19 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_funds'])) {
     }
 }
 
-// search
-if  (isset($_POST['search'])) {
-    $searchID = $_POST['searchCardID'];
-    $sQuery = "SELECT Balance FROM MembershipCard WHERE CardID = $searchID";
-    $sResult = mysqli_query($conn, $sQuery);
-    $searchCard = mysqli_fetch_assoc($sResult);
 
-    if ($searchCard) {
-        $message = "Balance for Card $searchID: RM" . $searchCard['Balance'];
-    } else {
-        $message = "Card ID $searchCardID not found.";
-    }
-}
 
 $conn->close();
 ?>
@@ -144,6 +132,16 @@ $conn->close();
     <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
     <link href="assets/css/main.css" rel="stylesheet">
+
+
+    <script>
+    function confirmCancellation(event) {
+        if (!confirm("Are you sure you want to cancel this membership card?")) {
+            event.preventDefault(); // Prevent form submission if the user cancels
+        }
+    }
+</script>
+
 </head>
 
 <body>
@@ -173,9 +171,7 @@ $conn->close();
         <div class="container">
             <h1 class="text-center mb-4">Membership Card Details</h1>
 
-            <?php if (!empty($message)) : ?>
-                <div class="alert alert-danger"><?= htmlspecialchars($message); ?></div>
-            <?php endif; ?>
+
 
             <?php if ($card) : ?>
                 <div class="card shadow-sm p-4 mx-auto" style="max-width: 500px;">
@@ -186,16 +182,7 @@ $conn->close();
 
                     <div class="card shadow-sm p-4 mx-auto mb-4" style="max-width: 500px;">
 
-                    <!--  (search) -->
-    <h4 class="card-title">Search Membership Card</h4>
-    <form method="POST" action="">
-        <div class="mb-3">
-            <label for="searchCardID" class="form-label">Enter Card ID</label>
-            <input type="number" class="form-control" id="searchCardID" name="searchCardID" placeholder="Card ID" required>
-        </div>
-        <button type="submit" name="search" class="btn btn-primary w-100">Search</button>
-    </form>
-</div>
+
 
 
                     <!-- add funds -->
@@ -211,14 +198,14 @@ $conn->close();
                     <!-- cancel -->
                     <form method="POST" action="" class="mt-3">
                         <input type="hidden" name="cardID" value="<?= $card['CardID']; ?>">
-                        <button type="submit" name="cancel_card" class="btn btn-danger w-100">Cancel Membership Card</button>
+                        <button type="submit" name="cancel_card" class="btn btn-danger w-100" onclick="confirmCancellation(event)">Cancel Membership Card</button>
                     </form>
                 </div>
             <?php else : ?>
                 <div class="card shadow-sm p-4 mx-auto text-center" style="max-width: 500px;">
                     <h4>No membership details found.</h4>
                     <form method="POST" action="" class="mt-3">
-                        <button type="submit" name="create_card" class="btn btn-primary w-100">Create Membership Card</button>
+                        <button type="submit" name="create_card" class="btn btn-primary w-100" >Create Membership Card</button>
                     </form>
                 </div>
             <?php endif; ?>

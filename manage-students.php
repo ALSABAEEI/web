@@ -191,6 +191,20 @@ $conn->close();
     </main>
 
     <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            if (this.querySelector('button[name="delete_student"]')) {
+                const confirmation = confirm("Are you sure you want to delete this student?");
+                if (!confirmation) {
+                    e.preventDefault(); // Prevent form submission if user cancels
+                }
+            }
+        });
+    });
+</script>
+
 </body>
 
 </html>

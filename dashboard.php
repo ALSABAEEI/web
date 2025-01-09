@@ -58,6 +58,76 @@ while ($row = mysqli_fetch_assoc($spendingResult)) {
     $yearlySpending[intval($row['Month'])] = $row['TotalSpent'];
 }
 
+
+$ordersMembershipCard = [];
+if ($membershipCard) {
+    $ordersQuery = "
+        SELECT DISTINCT orders.OrderID, orders.OrderTotal, orders.Date
+        FROM Orders orders
+        JOIN Transactions transc ON transc.CardID = {$membershipCard['CardID']}
+        WHERE orders.studID = $studID
+        AND transc.Type = 'Redeem'
+        ORDER BY orders.Date DESC;
+    ";
+
+    $ordersResult = mysqli_query($conn, $ordersQuery);
+    while ($row = mysqli_fetch_assoc($ordersResult)) {
+        $ordersMembershipCard[] = $row;
+    }
+}
+
+
+// search for card
+if  (isset($_POST['search'])) {
+    $searchID = $_POST['searchCardID'];
+    $sQuery = "SELECT Balance FROM MembershipCard WHERE CardID = $searchID";
+    $sResult = mysqli_query($conn, $sQuery);
+    $searchCard = mysqli_fetch_assoc($sResult);
+
+    if ($searchCard) {
+        $message = "Balance for Card $searchID: RM" . $searchCard['Balance'];
+    } else {
+        $message = "Card ID $searchCardID not found.";
+    }
+}
+
+// search order 
+if (isset($_POST['searchOrder'])) {
+    $searchOrderID = $_POST['searchOrderID'];
+    $searchOrderQuery = "
+        SELECT orders.OrderID, orders.OrderTotal, orders.Date, branch.BranchName
+        FROM Orders orders
+        JOIN Branch branch ON orders.BranchID = branch.BranchID
+        WHERE orders.OrderID = $searchOrderID AND orders.studID = $studID
+    ";
+    $searchOrderResult = mysqli_query($conn, $searchOrderQuery);
+
+    if (mysqli_num_rows($searchOrderResult) > 0) {
+        $searchedOrder = mysqli_fetch_assoc($searchOrderResult);
+
+      
+        $orderLineQuery = "
+            SELECT ol.SubPrice, pkg.PackageName
+            FROM Order_Line ol
+            JOIN Package pkg ON ol.PackageID = pkg.PackageID
+            WHERE ol.Order_ID = $searchOrderID
+        ";
+        $orderLineResult = mysqli_query($conn, $orderLineQuery);
+        $orderLines = [];
+        while ($row = mysqli_fetch_assoc($orderLineResult)) {
+            $orderLines[] = $row;
+        }
+
+    
+        $message = "Order Found: ID = " . htmlspecialchars($searchedOrder['OrderID']) .
+            ", Total = RM" . htmlspecialchars($searchedOrder['OrderTotal']) .
+            ", Date = " . htmlspecialchars($searchedOrder['Date']) .
+            ", Branch = " . htmlspecialchars($searchedOrder['BranchName']);
+    } else {
+        $message = "Order ID $searchOrderID not found.";
+    }
+}
+
 $conn->close();
 ?>
 
@@ -72,6 +142,12 @@ $conn->close();
     <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
     <link href="assets/css/main.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .btn-primary {
+            padding: 0.375rem 0.75rem;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 
 <body class="starter-page-page">
@@ -100,6 +176,31 @@ $conn->close();
     <!-- Main Content -->
     <main class="main bg-light py-5">
         <div class="container">
+            <?php if (!empty($message)) : ?>
+                <div class="alert alert-info"><?= htmlspecialchars($message); ?></div>
+            <?php endif; ?>
+            <?php if (isset($orderLines) && !empty($orderLines)) : ?>
+    <div class="card mt-4">
+        <h5 class="card-title">Order Line Breakdown</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Package Name</th>
+                    <th>Sub Price (RM)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($orderLines as $line) : ?>
+                    <tr>
+                        <td><?= htmlspecialchars($line['PackageName']); ?></td>
+                        <td>RM<?= htmlspecialchars($line['SubPrice']); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+<?php endif; ?>
+
             <div class="row">
                 <div class="col-lg-12 text-center mb-4">
                     <h1>Student Dashboard</h1>
@@ -125,11 +226,22 @@ $conn->close();
                         <h4>Membership Card</h4>
                         <?php if ($membershipCard): ?>
                             <p><strong>Card ID:</strong> <?= htmlspecialchars($membershipCard['CardID']); ?></p>
-                            <p><strong>Balance:</strong> RM<?= htmlspecialchars($membershipCard['Balance']); ?></p>
                             <a href="membership-card.php" class="btn btn-primary mt-2">View Details</a>
                         <?php else: ?>
                             <p>No Membership Card Found.</p>
                         <?php endif; ?>
+
+                        <!-- Search Membership Card -->
+                        <div class="card mt-4">
+                            <h5 class="card-title">Search Membership Card</h5>
+                            <form method="POST" action="">
+                                <div class="mb-3">
+                                    <label for="searchCardID" class="form-label">Enter Card ID</label>
+                                    <input type="number" class="form-control" id="searchCardID" name="searchCardID" placeholder="Card ID" required>
+                                </div>
+                                <button type="submit" name="search" class="btn btn-primary w-100">Search</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
@@ -143,11 +255,11 @@ $conn->close();
                 </div>
             </div>
 
-            <div class="row mt-5">
+            <div class="row mt-4">
                 <!-- Transaction Table -->
                 <div class="col-lg-6">
                     <div class="card shadow-sm p-3">
-                        <h4>Recent MembershipCard Activities</h4>
+                        <h4>Recent Membership Card Activities</h4>
                         <?php if ($transactions): ?>
                             <table class="table">
                                 <thead>
@@ -173,8 +285,51 @@ $conn->close();
                     </div>
                 </div>
 
-                <!-- Monthly Spending Chart -->
+                <!-- Previous Success Orders -->
                 <div class="col-lg-6">
+                    <div class="card shadow-sm p-3">
+                        <h4>Previous Success Orders</h4>
+                        <?php if ($ordersMembershipCard): ?>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Total (RM)</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($ordersMembershipCard as $order): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($order['OrderID']); ?></td>
+                                            <td>RM<?= htmlspecialchars($order['OrderTotal']); ?></td>
+                                            <td><?= htmlspecialchars($order['Date']); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php else: ?>
+                            <p>No orders linked to membership card found.</p>
+                        <?php endif; ?>
+
+                        <!-- Search Order -->
+                        <div class="card mt-4">
+                            <h5 class="card-title">Search Order</h5>
+                            <form method="POST" action="">
+                                <div class="mb-3">
+                                    <label for="searchOrderID" class="form-label">Enter Order ID</label>
+                                    <input type="number" class="form-control" id="searchOrderID" name="searchOrderID" placeholder="Order ID" required>
+                                </div>
+                                <button type="submit" name="searchOrder" class="btn btn-primary w-100">Search</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Spending Chart -->
+            <div class="row mt-4">
+                <div class="col-lg-12">
                     <div class="card shadow-sm p-3">
                         <h4>Monthly Spending</h4>
                         <canvas id="spendingChart"></canvas>
@@ -235,3 +390,4 @@ $conn->close();
 </body>
 
 </html>
+
