@@ -27,7 +27,7 @@ if (!$conn) {
   die("Connection failed: " . mysqli_connect_error());
 }
 
-// Fetch data for the header section
+// Amro Fetch data for the header section
 $totalBranchesQuery = "SELECT COUNT(BranchID) AS totalBranches FROM branch";
 $totalBranchesResult = mysqli_query($conn, $totalBranchesQuery);
 $totalBranches = mysqli_fetch_assoc($totalBranchesResult)['totalBranches'];
@@ -40,7 +40,7 @@ $totalRevenueQuery = "SELECT SUM(OrderTotal) AS totalRevenue FROM orders";
 $totalRevenueResult = mysqli_query($conn, $totalRevenueQuery);
 $totalRevenue = mysqli_fetch_assoc($totalRevenueResult)['totalRevenue'];
 
-// Fetch data for the bar chart (Orders per Branch)
+// Amro Fetch data for the bar chart (Orders per Branch)
 $ordersPerBranchQuery = "SELECT b.BranchName, COUNT(o.OrderID) AS totalOrders 
                          FROM orders o 
                          JOIN branch b ON o.BranchID = b.BranchID 
@@ -53,7 +53,7 @@ while ($row = mysqli_fetch_assoc($ordersPerBranchResult)) {
   $orders[] = $row['totalOrders'];
 }
 
-// Fetch data for the pie chart (Revenue per Branch)
+// Amro Fetch data for the pie chart (Revenue per Branch)
 $revenuePerBranchQuery = "
     SELECT b.BranchName, SUM(o.OrderTotal) AS revenue
     FROM orders o
@@ -67,7 +67,7 @@ while ($row = mysqli_fetch_assoc($revenuePerBranchResult)) {
   $revenues[] = $row['revenue'];
 }
 
-// Fetch data for Monthly Orders Trend (Line Chart)
+// Hisham Fetch data for Monthly Orders Trend (Line Chart)
 $monthlyOrdersQuery = "
   SELECT DATE_FORMAT(Date, '%Y-%m') AS Month, COUNT(OrderID) AS TotalOrders
   FROM orders
@@ -81,7 +81,7 @@ while ($row = mysqli_fetch_assoc($monthlyOrdersResult)) {
   $monthlyOrders[] = $row['TotalOrders'];
 }
 
-// Fetch data for Order Status Distribution (Doughnut Chart)
+// Hisham Fetch data for Order Status Distribution (Doughnut Chart)
 $orderStatusQuery = "
   SELECT OrderStatus, COUNT(OrderID) AS TotalOrders
   FROM orders
@@ -94,7 +94,7 @@ while ($row = mysqli_fetch_assoc($orderStatusResult)) {
   $orderStatusCounts[] = $row['TotalOrders'];
 }
 
-// Handle Order Status Search
+// Amro Handle Order Status Search
 $orderSearchResults = [];
 if (!empty($_GET['order_status'])) {
   $orderStatus = trim($_GET['order_status']);
@@ -106,7 +106,7 @@ if (!empty($_GET['order_status'])) {
   $orderSearchResults = mysqli_query($conn, $orderStatusQuery);
 }
 
-// Handle Date-based Search
+// Amro Handle Date-based Search
 $dateSearchResults = [];
 if (!empty($_GET['search_date'])) {
   $searchDate = trim($_GET['search_date']);
