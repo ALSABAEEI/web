@@ -20,8 +20,8 @@ if (!$conn) {
 
 // Handle branch deletion
 if (isset($_GET['deleteBranch'])) {
-  $branchID = intval($_GET['deleteBranch']); // Sanitize input
-  $deleteQuery = "DELETE FROM branch WHERE BranchID = $branchID"; // Direct query
+  $branchID = intval($_GET['deleteBranch']); 
+  $deleteQuery = "DELETE FROM branch WHERE BranchID = $branchID"; 
   if (mysqli_query($conn, $deleteQuery)) {
       $message = "Branch deleted successfully.";
   } else {
@@ -49,25 +49,25 @@ if (!$result) {
   <link href="assets/css/main.css" rel="stylesheet">
   <style>
     .btn-add-branch {
-      background-color: #28a745; /* Green color */
-      color: #fff; /* White text */
-      padding: 10px 20px; /* Padding for a larger button */
-      font-size: 16px; /* Slightly larger text */
-      font-weight: bold; /* Bold text */
-      border-radius: 5px; /* Rounded corners */
-      border: none; /* Remove border */
-      transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth hover effect */
+      background-color: #28a745; 
+      color: #fff; 
+      padding: 10px 20px; 
+      font-size: 16px; 
+      font-weight: bold; 
+      border-radius: 5px; 
+      border: none; 
+      transition: background-color 0.3s ease, transform 0.3s ease; 
     }
 
     .btn-add-branch:hover {
-      background-color: #218838; /* Darker green on hover */
-      transform: scale(1.05); /* Slight zoom effect */
-      cursor: pointer; /* Pointer cursor on hover */
+      background-color: #218838; 
+      transform: scale(1.05); 
+      cursor: pointer; 
     }
 
     .btn-add-branch:active {
-      background-color: #1e7e34; /* Even darker green when clicked */
-      transform: scale(0.95); /* Slight shrink effect when clicked */
+      background-color: #1e7e34; 
+      transform: scale(0.95); 
     }
   </style>
 </head>
