@@ -131,6 +131,8 @@ if (isset($_POST['searchOrder'])) {
     }
 }
 
+
+// order status chart
 $orderStatusQuery = "
     SELECT OrderStatus, COUNT(*) AS StatusCount
     FROM Orders
@@ -414,7 +416,7 @@ $conn->close();
         });
         
 
-// Order Status Chart
+// status  Chart
 const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
         const orderStatusLabels = <?= json_encode($orderStatuses); ?>;
         const orderStatusData = <?= json_encode($orderCounts); ?>;
