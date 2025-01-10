@@ -137,7 +137,7 @@ $conn->close();
     <script>
     function confirmCancellation(event) {
         if (!confirm("Are you sure you want to cancel this membership card?")) {
-            event.preventDefault(); // Prevent form submission if the user cancels
+            event.preventDefault();
         }
     }
 </script>
