@@ -59,7 +59,7 @@ while ($row = mysqli_fetch_assoc($spendingResult)) {
 }
 
 
-$ordersMembershipCard = [];
+$prevorders = [];
 if ($membershipCard) {
     $ordersQuery = "
     SELECT 
@@ -74,7 +74,7 @@ if ($membershipCard) {
 
     $ordersResult = mysqli_query($conn, $ordersQuery);
     while ($row = mysqli_fetch_assoc($ordersResult)) {
-        $ordersMembershipCard[] = $row;
+        $prevorders[] = $row;
     }
 }
 
@@ -291,7 +291,7 @@ $conn->close();
                 <div class="col-lg-6">
                     <div class="card shadow-sm p-3">
                         <h4>Previous Success Orders</h4>
-                        <?php if ($ordersMembershipCard): ?>
+                        <?php if ($prevorders): ?>
                             <table class="table">
                                 <thead>
                                     <tr>
@@ -301,7 +301,7 @@ $conn->close();
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($ordersMembershipCard as $order): ?>
+                                    <?php foreach ($prevorders as $order): ?>
                                         <tr>
                                             <td><?= htmlspecialchars($order['OrderID']); ?></td>
                                             <td>RM<?= htmlspecialchars($order['OrderTotal']); ?></td>
