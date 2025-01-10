@@ -58,7 +58,7 @@ while ($row = mysqli_fetch_assoc($spendingResult)) {
     $yearlySpending[($row['Month'])] = $row['TotalSpent'];
 }
 
-
+// prev orders
 $prevorders = [];
 if ($membershipCard) {
     $ordersQuery = "
@@ -71,6 +71,7 @@ if ($membershipCard) {
     ORDER BY o.Date DESC
     LIMIT 3;
 ";
+
 
     $ordersResult = mysqli_query($conn, $ordersQuery);
     while ($row = mysqli_fetch_assoc($ordersResult)) {
@@ -129,6 +130,22 @@ if (isset($_POST['searchOrder'])) {
         $message = "Order ID $searchOrderID not found.";
     }
 }
+
+$orderStatusQuery = "
+    SELECT OrderStatus, COUNT(*) AS StatusCount
+    FROM Orders
+    WHERE studID = $studID
+    GROUP BY OrderStatus;
+";
+$orderStatusResult = mysqli_query($conn, $orderStatusQuery);
+
+$orderStatuses = [];
+$orderCounts = [];
+while ($row = mysqli_fetch_assoc($orderStatusResult)) {
+    $orderStatuses[] = $row['OrderStatus'];
+    $orderCounts[] = $row['StatusCount'];
+}
+
 
 $conn->close();
 ?>
@@ -336,9 +353,16 @@ $conn->close();
                         <h4>Monthly Spending</h4>
                         <canvas id="spendingChart"></canvas>
                     </div>
+                    <!-- Order Status Overview Bar Chart -->
+                  
+                    <div class="card shadow-sm p-3">
+                        <h4>Order Status Overview</h4>
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
                 </div>
             </div>
-        </div>
+        
+       
     </main>
 
     <script>
@@ -388,8 +412,40 @@ $conn->close();
                 }
             }
         });
+        
+
+// Order Status Chart
+const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+        const orderStatusLabels = <?= json_encode($orderStatuses); ?>;
+        const orderStatusData = <?= json_encode($orderCounts); ?>;
+
+        new Chart(orderStatusCtx, {
+            type: 'bar',
+            data: {
+                labels: orderStatusLabels,
+                datasets: [{
+                    label: 'Number of Orders',
+                    data: orderStatusData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Order Statuses' } },
+                    y: { beginAtZero: true, title: { display: true, text: 'Number of Orders' } }
+                }
+            }
+        });
+
+
     </script>
 </body>
 
 </html>
-
