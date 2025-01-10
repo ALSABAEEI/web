@@ -55,20 +55,22 @@ $spendingResult = mysqli_query($conn, $spendingQuery);
 
 $yearlySpending = array_fill(1, 12, 0);
 while ($row = mysqli_fetch_assoc($spendingResult)) {
-    $yearlySpending[intval($row['Month'])] = $row['TotalSpent'];
+    $yearlySpending[($row['Month'])] = $row['TotalSpent'];
 }
 
 
 $ordersMembershipCard = [];
 if ($membershipCard) {
     $ordersQuery = "
-        SELECT DISTINCT orders.OrderID, orders.OrderTotal, orders.Date
-        FROM Orders orders
-        JOIN Transactions transc ON transc.CardID = {$membershipCard['CardID']}
-        WHERE orders.studID = $studID
-        AND transc.Type = 'Redeem'
-        ORDER BY orders.Date DESC;
-    ";
+    SELECT 
+        o.OrderID, 
+        o.OrderTotal, 
+        o.Date
+    FROM Orders o
+    WHERE o.studID = $studID
+    ORDER BY o.Date DESC
+    LIMIT 3;
+";
 
     $ordersResult = mysqli_query($conn, $ordersQuery);
     while ($row = mysqli_fetch_assoc($ordersResult)) {
