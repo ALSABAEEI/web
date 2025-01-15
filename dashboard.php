@@ -348,14 +348,14 @@ $conn->close();
                 </div>
             </div>
 
-            <!-- Monthly Spending Chart -->
+            <!-- monthly spending chart 1 -->
             <div class="row mt-4">
                 <div class="col-lg-12">
                     <div class="card shadow-sm p-3">
                         <h4>Monthly Spending</h4>
                         <canvas id="spendingChart"></canvas>
                     </div>
-                    <!-- Order Status Overview Bar Chart -->
+                    <!-- order Status  chart 2 -->
                   
                     <div class="card shadow-sm p-3">
                         <h4>Order Status Overview</h4>
