@@ -69,30 +69,40 @@ while ($row = mysqli_fetch_assoc($revenuePerBranchResult)) {
 
 // Hisham Fetch data for Monthly Orders Trend (Line Chart)
 $monthlyOrdersQuery = "
-  SELECT DATE_FORMAT(Date, '%Y-%m') AS Month, COUNT(OrderID) AS TotalOrders
-  FROM orders
-  GROUP BY Month
-  ORDER BY Month";
+  SELECT DATE_FORMAT(o.Date, '%Y-%m') AS Month, b.BranchName, COUNT(o.OrderID) AS TotalOrders
+  FROM orders o
+  JOIN branch b ON o.BranchID = b.BranchID
+  GROUP BY Month, b.BranchName
+  ORDER BY Month, b.BranchName";
 $monthlyOrdersResult = mysqli_query($conn, $monthlyOrdersQuery);
+
 $months = [];
+$branchesForMonth = [];
 $monthlyOrders = [];
 while ($row = mysqli_fetch_assoc($monthlyOrdersResult)) {
   $months[] = $row['Month'];
+  $branchesForMonth[] = $row['BranchName'];
   $monthlyOrders[] = $row['TotalOrders'];
 }
 
+
 // Hisham Fetch data for Order Status Distribution (Doughnut Chart)
 $orderStatusQuery = "
-  SELECT OrderStatus, COUNT(OrderID) AS TotalOrders
-  FROM orders
-  GROUP BY OrderStatus";
+    SELECT b.BranchName, o.OrderStatus, COUNT(o.OrderID) AS TotalOrders
+    FROM orders o
+    JOIN branch b ON o.BranchID = b.BranchID
+    GROUP BY b.BranchName, o.OrderStatus";
 $orderStatusResult = mysqli_query($conn, $orderStatusQuery);
+
+$branchesForStatus = [];
 $orderStatuses = [];
 $orderStatusCounts = [];
 while ($row = mysqli_fetch_assoc($orderStatusResult)) {
+  $branchesForStatus[] = $row['BranchName'];
   $orderStatuses[] = $row['OrderStatus'];
   $orderStatusCounts[] = $row['TotalOrders'];
 }
+
 
 // Amro Handle Order Status Search
 $orderSearchResults = [];
@@ -244,19 +254,50 @@ if (!empty($_GET['search_date'])) {
       <canvas id="monthlyOrdersChart"></canvas>
       <script>
         const months = <?php echo json_encode($months); ?>;
+        const branchesForMonth = <?php echo json_encode($branchesForMonth); ?>;
         const monthlyOrders = <?php echo json_encode($monthlyOrders); ?>;
+
+        // Group data by branches
+        const dataByBranch = {};
+        months.forEach((month, index) => {
+          const branch = branchesForMonth[index];
+          const orders = monthlyOrders[index];
+
+          if (!dataByBranch[branch]) {
+            dataByBranch[branch] = {
+              labels: [],
+              data: []
+            };
+          }
+
+          dataByBranch[branch].labels.push(month);
+          dataByBranch[branch].data.push(orders);
+        });
+
+        // Prepare datasets
+        const datasets = Object.keys(dataByBranch).map(branch => ({
+          label: branch,
+          data: dataByBranch[branch].data,
+          borderColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`,
+          fill: false
+        }));
+
+        // Render the chart
         const ctx3 = document.getElementById('monthlyOrdersChart').getContext('2d');
         new Chart(ctx3, {
           type: 'line',
           data: {
-            labels: months,
-            datasets: [{
-              label: 'Monthly Orders',
-              data: monthlyOrders,
-              borderColor: 'rgba(75, 192, 192, 1)',
-              fill: false,
-              tension: 0.1
-            }]
+            labels: [...new Set(months)], // Unique months
+            datasets: datasets
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top'
+              }
+            }
           }
         });
       </script>
@@ -265,20 +306,54 @@ if (!empty($_GET['search_date'])) {
       <h4>Order Status Distribution</h4>
       <canvas id="orderStatusChart"></canvas>
       <script>
+        const branchesForStatus = <?php echo json_encode($branchesForStatus); ?>;
         const orderStatuses = <?php echo json_encode($orderStatuses); ?>;
         const orderStatusCounts = <?php echo json_encode($orderStatusCounts); ?>;
+
+        // Combine branch and status for labels
+        const labels = branchesForStatus.map((branch, index) => `${branch} - ${orderStatuses[index]}`);
+
+
+        const backgroundColors = labels.map(() => {
+          const r = Math.floor(Math.random() * 255);
+          const g = Math.floor(Math.random() * 255);
+          const b = Math.floor(Math.random() * 255);
+          return `rgba(${r}, ${g}, ${b}, 0.6)`;
+        });
+
         const ctx4 = document.getElementById('orderStatusChart').getContext('2d');
         new Chart(ctx4, {
           type: 'doughnut',
           data: {
-            labels: orderStatuses,
+            labels: labels,
             datasets: [{
+
               data: orderStatusCounts,
-              backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 192, 0.6)']
+
+              backgroundColor: backgroundColors
             }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'right'
+              },
+              tooltip: {
+                callbacks: {
+                  label: (context) => {
+                    const label = context.label;
+                    const count = context.raw;
+                    return `${label}: ${count}`;
+                  }
+                }
+              }
+            }
           }
         });
       </script>
+
     </div>
     <br><br>
     <hr><br>
