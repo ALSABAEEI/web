@@ -92,7 +92,13 @@ $conn->close();
     <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
     <link href="assets/css/main.css" rel="stylesheet">
 
-    
+    <script>
+    function confirmUpdate(event) {
+        if (!confirm("Are you sure you want to update your information?")) {
+            event.preventDefault();
+        }
+    }
+</script>
 </head>
 
 <body>
@@ -164,7 +170,7 @@ $conn->close();
                         <?php endif; ?>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">Update Information</button>
+                    <button type="submit" class="btn btn-primary" onclick="confirmUpdate(event)">Update Information</button>
                 </form>
             <?php else : ?>
                 <p>No student data found.</p>
@@ -173,14 +179,6 @@ $conn->close();
     </main>
 
     <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script>
-    document.querySelector('form').addEventListener('submit', function (e) {
-        const confirmation = confirm("Are you sure you want to update your information?");
-        if (!confirmation) {
-            e.preventDefault(); // Prevent form submission if user cancels
-        }
-    });
-</script>
 
 </body>
 

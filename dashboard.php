@@ -55,24 +55,27 @@ $spendingResult = mysqli_query($conn, $spendingQuery);
 
 $yearlySpending = array_fill(1, 12, 0);
 while ($row = mysqli_fetch_assoc($spendingResult)) {
-    $yearlySpending[intval($row['Month'])] = $row['TotalSpent'];
+    $yearlySpending[($row['Month'])] = $row['TotalSpent'];
 }
 
-
-$ordersMembershipCard = [];
+// prev orders
+$prevorders = [];
 if ($membershipCard) {
     $ordersQuery = "
-        SELECT DISTINCT orders.OrderID, orders.OrderTotal, orders.Date
-        FROM Orders orders
-        JOIN Transactions transc ON transc.CardID = {$membershipCard['CardID']}
-        WHERE orders.studID = $studID
-        AND transc.Type = 'Redeem'
-        ORDER BY orders.Date DESC;
-    ";
+    SELECT 
+        o.OrderID, 
+        o.OrderTotal, 
+        o.Date
+    FROM Orders o
+    WHERE o.studID = $studID
+    ORDER BY o.Date DESC
+    LIMIT 3;
+";
+
 
     $ordersResult = mysqli_query($conn, $ordersQuery);
     while ($row = mysqli_fetch_assoc($ordersResult)) {
-        $ordersMembershipCard[] = $row;
+        $prevorders[] = $row;
     }
 }
 
@@ -127,6 +130,24 @@ if (isset($_POST['searchOrder'])) {
         $message = "Order ID $searchOrderID not found.";
     }
 }
+
+
+// order status chart
+$orderStatusQuery = "
+    SELECT OrderStatus, COUNT(*) AS StatusCount
+    FROM Orders
+    WHERE studID = $studID
+    GROUP BY OrderStatus;
+";
+$orderStatusResult = mysqli_query($conn, $orderStatusQuery);
+
+$orderStatuses = [];
+$orderCounts = [];
+while ($row = mysqli_fetch_assoc($orderStatusResult)) {
+    $orderStatuses[] = $row['OrderStatus'];
+    $orderCounts[] = $row['StatusCount'];
+}
+
 
 $conn->close();
 ?>
@@ -289,7 +310,7 @@ $conn->close();
                 <div class="col-lg-6">
                     <div class="card shadow-sm p-3">
                         <h4>Previous Success Orders</h4>
-                        <?php if ($ordersMembershipCard): ?>
+                        <?php if ($prevorders): ?>
                             <table class="table">
                                 <thead>
                                     <tr>
@@ -299,7 +320,7 @@ $conn->close();
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($ordersMembershipCard as $order): ?>
+                                    <?php foreach ($prevorders as $order): ?>
                                         <tr>
                                             <td><?= htmlspecialchars($order['OrderID']); ?></td>
                                             <td>RM<?= htmlspecialchars($order['OrderTotal']); ?></td>
@@ -327,16 +348,23 @@ $conn->close();
                 </div>
             </div>
 
-            <!-- Monthly Spending Chart -->
+            <!-- monthly spending chart 1 -->
             <div class="row mt-4">
                 <div class="col-lg-12">
                     <div class="card shadow-sm p-3">
                         <h4>Monthly Spending</h4>
                         <canvas id="spendingChart"></canvas>
                     </div>
+                    <!-- order Status  chart 2 -->
+                  
+                    <div class="card shadow-sm p-3">
+                        <h4>Order Status Overview</h4>
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
                 </div>
             </div>
-        </div>
+        
+       
     </main>
 
     <script>
@@ -386,8 +414,40 @@ $conn->close();
                 }
             }
         });
+        
+
+// status  Chart
+const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+        const orderStatusLabels = <?= json_encode($orderStatuses); ?>;
+        const orderStatusData = <?= json_encode($orderCounts); ?>;
+
+        new Chart(orderStatusCtx, {
+            type: 'bar',
+            data: {
+                labels: orderStatusLabels,
+                datasets: [{
+                    label: 'Number of Orders',
+                    data: orderStatusData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Order Statuses' } },
+                    y: { beginAtZero: true, title: { display: true, text: 'Number of Orders' } }
+                }
+            }
+        });
+
+
     </script>
 </body>
 
 </html>
-

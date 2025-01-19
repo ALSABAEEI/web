@@ -79,6 +79,14 @@ $conn->close();
     <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
     <link href="assets/css/main.css" rel="stylesheet">
+
+    <script>
+    function confirmDelete(event) {
+        if (!confirm("Are you sure you want to delete this student?")) {
+            event.preventDefault();
+        }
+    }
+</script>
 </head>
 
 <body>
@@ -150,7 +158,7 @@ $conn->close();
                                     <a href="Admin-update-student.php?studID=<?= $student['studID']; ?>" class="btn btn-warning btn-sm">Update</a>
                                     <form method="POST" action="" class="d-inline">
                                         <input type="hidden" name="studID" value="<?= $student['studID']; ?>">
-                                        <button type="submit" name="delete_student" class="btn btn-danger btn-sm">Delete</button>
+                                        <button type="submit" name="delete_student" class="btn btn-danger btn-sm" onclick="confirmDelete(event)">Delete</button>
                                     </form>
                                 </td>
                             </tr>
@@ -192,18 +200,7 @@ $conn->close();
 
     <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     
-    <script>
-    document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('submit', function (e) {
-            if (this.querySelector('button[name="delete_student"]')) {
-                const confirmation = confirm("Are you sure you want to delete this student?");
-                if (!confirmation) {
-                    e.preventDefault(); // Prevent form submission if user cancels
-                }
-            }
-        });
-    });
-</script>
+
 
 </body>
 
